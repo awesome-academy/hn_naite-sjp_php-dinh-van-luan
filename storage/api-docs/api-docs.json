@@ -1,8 +1,8 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "🎯 Personal Finance Management API",
-        "description": "📚 Tài liệu API cho dự án quản lý tài chính cá nhân",
+        "title": "Personal Finance Management API",
+        "description": "Tài liệu API cho dự án quản lý tài chính cá nhân",
         "contact": {
             "email": "dinh.van.luan@sun-asterisk.com"
         },
@@ -21,7 +21,7 @@
                     "Auth"
                 ],
                 "summary": "Đăng nhập tài khoản",
-                "description": "🔑 Login endpoint",
+                "description": "Login endpoint",
                 "operationId": "6ccc9dfb83bd463dd446668cc8babee4",
                 "requestBody": {
                     "required": true,
@@ -180,6 +180,201 @@
                     }
                 ]
             }
+        },
+        "/api/wallet": {
+            "post": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Tạo ví mới",
+                "description": "Tạo ví mới với loại: basic, saving, credit. Cần token xác thực.",
+                "operationId": "f697473ff44c1883711dacc965654d4b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "oneOf": [
+                                    {
+                                        "required": [
+                                            "name",
+                                            "balance",
+                                            "currency_id",
+                                            "wallet_type"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "example": "My Wallet"
+                                            },
+                                            "balance": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 1000
+                                            },
+                                            "currency_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "wallet_type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "basic"
+                                                ],
+                                                "example": "basic"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "required": [
+                                            "name",
+                                            "balance",
+                                            "currency_id",
+                                            "wallet_type",
+                                            "target_amount",
+                                            "end_date"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Saving Wallet"
+                                            },
+                                            "balance": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 500
+                                            },
+                                            "currency_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "wallet_type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "saving"
+                                                ],
+                                                "example": "saving"
+                                            },
+                                            "target_amount": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 10000
+                                            },
+                                            "end_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2025-12-31"
+                                            }
+                                        },
+                                        "type": "object"
+                                    },
+                                    {
+                                        "required": [
+                                            "name",
+                                            "balance",
+                                            "currency_id",
+                                            "wallet_type",
+                                            "credit_limit",
+                                            "statement_date",
+                                            "payment_due_date"
+                                        ],
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "example": "Credit Card Wallet"
+                                            },
+                                            "balance": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 200
+                                            },
+                                            "currency_id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "wallet_type": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "credit"
+                                                ],
+                                                "example": "credit"
+                                            },
+                                            "credit_limit": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 5000
+                                            },
+                                            "statement_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2025-07-01"
+                                            },
+                                            "payment_due_date": {
+                                                "type": "string",
+                                                "format": "date",
+                                                "example": "2025-07-15"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Tạo ví thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "wallet": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "My Wallet"
+                                                },
+                                                "balance": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 1000
+                                                },
+                                                "wallet_type": {
+                                                    "type": "string",
+                                                    "example": "basic"
+                                                },
+                                                "currency_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ"
+                    },
+                    "500": {
+                        "description": "Tạo ví thất bại do lỗi server"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -198,6 +393,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Wallet",
+            "description": "Wallet"
         }
     ],
     "security": [
