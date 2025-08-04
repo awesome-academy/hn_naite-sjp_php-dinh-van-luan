@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\User\WalletController;
 
 /*
 |--------------------------------------------------------------------------
@@ -22,4 +23,5 @@ Route::middleware(['auth:sanctum, checkAccessTokenExpiry'])
     ->group(function () {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/profile', [AuthController::class, 'profile']);
+        Route::post('/wallet', [WalletController::class, 'create']);
     });
