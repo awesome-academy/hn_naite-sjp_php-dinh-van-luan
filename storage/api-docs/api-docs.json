@@ -366,7 +366,169 @@
                         "description": "Dữ liệu không hợp lệ"
                     },
                     "500": {
-                        "description": "Tạo ví thất bại do lỗi server"
+                        "description": "Tạo ví thất bại"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/by-user": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Lấy danh sách ví theo người dùng",
+                "description": "Lấy danh sách ví của user hiện tại hoặc theo user_id truyền vào (nếu có). Bao gồm cả ví saving và credit.",
+                "operationId": "669754dfb705180959cf0dc7f6b04d2a",
+                "parameters": [
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "description": "ID người dùng (nếu không có sẽ lấy từ token)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Danh sách ví thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "wallets": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "My Wallet"
+                                                    },
+                                                    "balance": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 1000
+                                                    },
+                                                    "wallet_type": {
+                                                        "type": "string",
+                                                        "example": "saving"
+                                                    },
+                                                    "currency_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "saving_wallet": {
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    },
+                                                    "credit_wallet": {
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi server"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/wallet/get/{id}": {
+            "get": {
+                "tags": [
+                    "Wallet"
+                ],
+                "summary": "Lấy chi tiết ví",
+                "description": "Trả về chi tiết ví theo ID. Bao gồm các thuộc tính mở rộng nếu là ví saving hoặc credit.",
+                "operationId": "59c7edc6bc7ffbb5edf01ac5644fbbc2",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID của ví",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Chi tiết ví thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "wallet": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 2
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "My Wallet"
+                                                },
+                                                "balance": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 2000
+                                                },
+                                                "wallet_type": {
+                                                    "type": "string",
+                                                    "example": "credit"
+                                                },
+                                                "currency_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "saving_wallet": {
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "credit_wallet": {
+                                                    "type": "object",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Không tìm thấy ví"
+                    },
+                    "500": {
+                        "description": "Lỗi server"
                     }
                 },
                 "security": [
