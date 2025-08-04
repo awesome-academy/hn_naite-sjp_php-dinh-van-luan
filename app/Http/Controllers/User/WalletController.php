@@ -26,7 +26,7 @@ class WalletController extends Controller
 
             DB::beginTransaction();
 
-            $wallet = $service->create(new Request($validated));
+            $wallet = $service->create($validated);
 
             DB::commit();
 
@@ -70,6 +70,24 @@ class WalletController extends Controller
             return ApiResponse::error(__('wallet.not_found'), [], HttpStatusCode::NOT_FOUND);
         } catch (\Exception $e) {
             return ApiResponse::error(__('wallet.fetch_failed'), [], HttpStatusCode::INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $validated = WalletValidator::validate($request);
+            $wallet = Wallet::findOrFail($id);
+            $service = WalletServiceFactory::make($wallet->wallet_type);
+            $wallet = $service->update($validated, $wallet);
+
+            return ApiResponse::success([
+                'wallet' => $wallet
+            ], __('wallet.update_successfully'));
+        } catch (ValidationException $e) {
+            return ApiResponse::error(__('wallet.invalid_data'), $e->errors(), HttpStatusCode::UNPROCESSABLE_ENTITY);
+        } catch (\Exception $e) {
+            return ApiResponse::error(__('wallet.update_failed'), [], HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }
 }
