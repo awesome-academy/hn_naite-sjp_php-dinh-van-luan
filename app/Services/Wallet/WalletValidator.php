@@ -18,6 +18,7 @@ class WalletValidator
         ];
 
         $savingRules = [
+            'initial_amount' => 'required|numeric|min:0',
             'target_amount' => 'required|numeric|min:0',
             'end_date'      => 'required|date|after:today',
         ];

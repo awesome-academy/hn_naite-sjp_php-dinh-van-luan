@@ -29,5 +29,6 @@ Route::middleware(['auth:sanctum, checkAccessTokenExpiry'])
             Route::post('/create', [WalletController::class, 'create']);
             Route::get('/by-user', [WalletController::class, 'getWalletsByUser']);
             Route::get('/get/{id}', [WalletController::class, 'getWalletDetail']);
+            Route::put('/update/{id}', [WalletController::class, 'update']);
         });
     });
