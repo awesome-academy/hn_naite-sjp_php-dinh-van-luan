@@ -81,4 +81,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserFeedbackReport::class);
     }
+
+    public function userSetting()
+    {
+        return $this->hasOne(UserSetting::class);
+    }
+
+    public function budgets()
+    {
+        return $this->hasMany(Budget::class);
+    }
 }

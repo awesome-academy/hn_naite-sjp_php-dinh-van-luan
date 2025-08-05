@@ -141,6 +141,7 @@ và update role cho user lên premium user
   id int pk
   // user_id int 
   category_id int
+  user_id int
   limit_amount decimal // Giới hạn chi tiêu 
   spent_amount decimal // Tổng đã chi trong kỳ
   // overspent_amount decimal // Bội chi (0 nếu chưa vượt ngân sách)
@@ -272,3 +273,52 @@ php artisan make:migration create_category_wallet_types_table --create=category_
 
 php artisan make:migration create_exchange_rates_table --create=exchange_rates
 php artisan make:migration create_user_settings_table --create=user_settings
+
+## Specs
+### Budget User
+#### 1. Create Budget
+##### 1.1 Input
++ category_id: Nhóm
++ limit_amount: Số tiền giới hạn
++ spent_amount: Tổng số tiền đã chi trong kỳ
++ wallet_use_scope: 'total', 'wallet'
++ wallet_id
++ start_date
++ end_date
++ is_recurring
++ recurring_type: 'weekly', 'monthly', 'quarterly', 'yearly', 'option'
+
+##### 1.2 Logic
+1. Nhóm
+2. Số tiền giới hạn: > 0 
+3. KHoảng thời gian:
+  + Tuần này: start_time: ngày đầu của tuần hiện tại, end_time: ngày cuối cùng của tuần hiện tại
+  + Tháng này: tương tự
+  + Quý này: tương tự
+  + Năm này: tương tự
+  + Tùy chọn
+4. Loại ví áp dụng 
+   + Tổng tất cả các ví (total): wallet_id = null
+   + 1 ví cụ thể (wallet): wallet_id != null 
+5. Định kỳ (is_recurring): true / false
+   + True: Chỉ áp dụng cho 4 loại khoảng thời gian (recurring_type): Tuần này, Tháng này, Quý này, Năm này
+   + False: recurring_type = 'option'
+
+- Khi tạo mới 1 budget: sẽ check tất cả các budget với category_id của user này
+    + Nếu đã tồn tại budget cùng nhóm (category_id)
+         + Nếu có cùng khoảng thời gian (start_time - end_time) -> update lại limit_amount của budget đã tồn tại đó.
+         + Nếu không cùng khoảng thòi gian -> tạo mới budget
+            **Note**: Nếu đã tồn tại các giao dịch cho category_id này trong khoảng thời gian này: cập nhật spent_amount cho budget này luôn.
+    + Nếu không tồn tại budget cùng nhóm: tạo mới budget
+   	        **Note**: Nếu đã tồn tại các giao dịch cho category_id này trong khoảng thời gian này: cập nhật spent_amount cho budget này luôn.
+
+- Logic tính spent amount
+    Hiện tại hệ thống hỗ trợ user tạo nhiều ví, mỗi ví có thể có nhiều loại tiền tệ khác nhau.
+    - Trong trường hợp **wallet_use_scope** của budget là **total** (áp dụng trên ví tổng):
+    -> Thì limit_amount của budget sẽ có tỷ giá là tỷ giá mặc định trong user_settings
+    -> Khi check các giao dịch: sẽ cần convert (balance, currency) của giao dịch -> (limit_amount, currency) tương ứng của budget
+    - Trong trường hợp **wallet_use_scope** của budget là **wallet** (áp dụng trên ví cụ thể):
+    -> Thì limit_amount của budget sẽ có tỷ giá là tỷ giá của wallet
+
+- Dựa vào ExchangeRate để chuyển đổi tỷ giá: currency_id là base currency, target_currency_code là to currency. 
+    Trong trường hợp currency của user setting không phải là from currency. Ví dụ: base currency là usd, currency của balance transaction là vnd, currency của limit_amount là jpy thì phải dựa vào base currency để làm giá trị trung gian tính  

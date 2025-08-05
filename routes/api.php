@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\User\WalletController;
+use App\Http\Controllers\User\BudgetController;
 use App\Models\Role;
 
 /*
@@ -30,5 +31,9 @@ Route::middleware(['auth:sanctum, checkAccessTokenExpiry'])
             Route::get('/by-user', [WalletController::class, 'getWalletsByUser']);
             Route::get('/get/{id}', [WalletController::class, 'getWalletDetail']);
             Route::put('/update/{id}', [WalletController::class, 'update']);
+        });
+
+        Route::prefix('budget')->group(function () {
+            Route::post('/create', [BudgetController::class, 'create']);
         });
     });

@@ -181,6 +181,233 @@
                 ]
             }
         },
+        "/api/budget/create": {
+            "post": {
+                "tags": [
+                    "Budget"
+                ],
+                "summary": "Tạo ngân sách mới hoặc cập nhật nếu đã tồn tại",
+                "description": "Tạo ngân sách theo category, loại ví, khoảng thời gian, có thể theo chu kỳ (recurring).",
+                "operationId": "f4372a9f03ac653eb55547ad4da49186",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "category_id",
+                                    "limit_amount",
+                                    "spent_amount",
+                                    "wallet_use_scope",
+                                    "is_recurring",
+                                    "recurring_type",
+                                    "start_date",
+                                    "end_date"
+                                ],
+                                "properties": {
+                                    "category_id": {
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "limit_amount": {
+                                        "type": "number",
+                                        "example": 5000
+                                    },
+                                    "spent_amount": {
+                                        "type": "number",
+                                        "example": 1000
+                                    },
+                                    "wallet_use_scope": {
+                                        "type": "string",
+                                        "enum": [
+                                            "wallet",
+                                            "total"
+                                        ],
+                                        "example": "wallet"
+                                    },
+                                    "wallet_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "is_recurring": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "recurring_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "weekly",
+                                            "monthly",
+                                            "quarterly",
+                                            "yearly",
+                                            "custom"
+                                        ],
+                                        "example": "monthly"
+                                    },
+                                    "start_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-08-01"
+                                    },
+                                    "end_date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-08-31"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Ngân sách đã được tạo hoặc cập nhật",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Ngân sách đã được tạo thành công"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "budget": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 12
+                                                        },
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "category_id": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "limit_amount": {
+                                                            "type": "number",
+                                                            "example": 5000
+                                                        },
+                                                        "spent_amount": {
+                                                            "type": "number",
+                                                            "example": 1000
+                                                        },
+                                                        "wallet_use_scope": {
+                                                            "type": "string",
+                                                            "example": "wallet"
+                                                        },
+                                                        "wallet_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "is_recurring": {
+                                                            "type": "boolean",
+                                                            "example": true
+                                                        },
+                                                        "recurring_type": {
+                                                            "type": "string",
+                                                            "example": "monthly"
+                                                        },
+                                                        "start_date": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2025-08-01"
+                                                        },
+                                                        "end_date": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2025-08-31"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-08-05T10:00:00Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "format": "date-time",
+                                                            "example": "2025-08-05T10:00:00Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ hoặc thiếu",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Dữ liệu không hợp lệ"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "category_id": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Trường category_id là bắt buộc."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi hệ thống khi tạo ngân sách",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tạo ngân sách thất bại"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/wallet": {
             "post": {
                 "tags": [
@@ -603,6 +830,11 @@
                                                 "type": "string",
                                                 "example": "Updated Saving Wallet"
                                             },
+                                            "balance": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 2000
+                                            },
                                             "initial_amount": {
                                                 "type": "number",
                                                 "format": "float",
@@ -648,6 +880,11 @@
                                                 "type": "integer",
                                                 "example": 1
                                             },
+                                            "credit_limit": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 2000
+                                            },
                                             "statement_date": {
                                                 "type": "string",
                                                 "format": "date",
@@ -686,7 +923,7 @@
                                                 "wallet": {
                                                     "oneOf": [
                                                         {
-                                                            "description": "Cập nhật ví cơ bản",
+                                                            "description": "Ví cơ bản",
                                                             "properties": {
                                                                 "id": {
                                                                     "type": "integer",
@@ -726,7 +963,7 @@
                                                             "type": "object"
                                                         },
                                                         {
-                                                            "description": "Cập nhật ví tiết kiệm",
+                                                            "description": "Ví tiết kiệm",
                                                             "properties": {
                                                                 "id": {
                                                                     "type": "integer",
@@ -784,7 +1021,7 @@
                                                             "type": "object"
                                                         },
                                                         {
-                                                            "description": "Cập nhật ví tín dụng",
+                                                            "description": "Ví tín dụng",
                                                             "properties": {
                                                                 "id": {
                                                                     "type": "integer",
@@ -902,6 +1139,10 @@
         {
             "name": "Auth",
             "description": "Auth"
+        },
+        {
+            "name": "Budget",
+            "description": "Budget"
         },
         {
             "name": "Wallet",

@@ -187,7 +187,7 @@ namespace App\Docs;
  *             @OA\Property(property="data", type="object",
  *                 @OA\Property(property="wallet", oneOf={
  *                     @OA\Schema(
- *                         description=Ví cơ bản",
+ *                         description="Ví cơ bản",
  *                         @OA\Property(property="id", type="integer", example=1),
  *                         @OA\Property(property="user_id", type="integer", example=5),
  *                         @OA\Property(property="name", type="string", example="Basic Wallet"),
@@ -198,7 +198,7 @@ namespace App\Docs;
  *                         @OA\Property(property="updated_at", type="string", format="date-time", example="2025-07-31T10:05:00Z")
  *                     ),
  *                     @OA\Schema(
- *                         description=Ví tiết kiệm",
+ *                         description="Ví tiết kiệm",
  *                         @OA\Property(property="id", type="integer", example=2),
  *                         @OA\Property(property="user_id", type="integer", example=5),
  *                         @OA\Property(property="name", type="string", example="Saving Wallet"),
@@ -214,7 +214,7 @@ namespace App\Docs;
  *                         )
  *                     ),
  *                     @OA\Schema(
- *                         description=Ví tín dụng",
+ *                         description="Ví tín dụng",
  *                         @OA\Property(property="id", type="integer", example=3),
  *                         @OA\Property(property="user_id", type="integer", example=5),
  *                         @OA\Property(property="name", type="string", example="Credit Wallet"),

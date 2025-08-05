@@ -16,6 +16,7 @@ class CreateBudgetsTable extends Migration
         Schema::create('budgets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->decimal('limit_amount', 15, 2);
             $table->decimal('spent_amount', 15, 2)->default(0);
             $table->enum('wallet_use_scope', ['total', 'wallet']);
@@ -23,7 +24,7 @@ class CreateBudgetsTable extends Migration
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->boolean('is_recurring')->default(false);
-            $table->enum('recurring_type', ['weekly', 'monthly', 'quarterly', 'yearly'])->nullable();
+            $table->enum('recurring_type', ['weekly', 'monthly', 'quarterly', 'yearly', 'option']);
             $table->timestamps();
         });
     }
