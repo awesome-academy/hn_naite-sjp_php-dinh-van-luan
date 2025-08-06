@@ -14,7 +14,12 @@ use Mavinoo\Batch\Batch;
 
 class CurrencyManagementController extends Controller
 {
-    private const PER_PAGE = 10;
+    protected int $perPage;
+
+    public function __construct()
+    {
+        $this->perPage = config("paginate")["per_page"] ?? 10;
+    }
 
     public function index(Request $request)
     {
@@ -32,7 +37,7 @@ class CurrencyManagementController extends Controller
             });
         }
 
-        $currencies = $currenciesQuery->orderBy('id')->paginate(self::PER_PAGE);
+        $currencies = $currenciesQuery->orderBy('id')->paginate($this->perPage);
 
         return view('admin.currency-management.index', [
             'currencies' => $currencies,

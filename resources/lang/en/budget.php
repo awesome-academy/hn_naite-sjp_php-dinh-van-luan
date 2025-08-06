@@ -8,4 +8,6 @@ return [
     'invalid_recurring_type'   => 'Invalid recurring type. Must be weekly, monthly, quarterly, or yearly.',
     'custom_date_required'     => 'Start and end dates are required when not using recurring type.',
     'user_setting_currency_missing' => 'Default currency is not defined in user settings.',
+    'invalid_query' => 'Invalid query.',
+    'fetch_failed' => 'Fetch budget faild.',
 ];

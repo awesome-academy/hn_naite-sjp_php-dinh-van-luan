@@ -13,9 +13,18 @@ use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 use App\Constants\WalletUseScopes;
 use App\Services\Budget\BudgetService;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 
 class BudgetController extends Controller
 {
+    protected int $perPage;
+
+    public function __construct()
+    {
+        $this->perPage = config("paginate")["per_page"] ?? 10;
+    }
+
     public function create(Request $request, BudgetService $budgetService)
     {
         try {
@@ -53,8 +62,10 @@ class BudgetController extends Controller
                     return ApiResponse::error(__('budget.invalid_recurring_type'), [], HttpStatusCode::UNPROCESSABLE_ENTITY);
                 }
 
+                $timezone = $user?->timezone ?? config('app.timezone');
+
                 // Calculate the period based on the recurring type
-                [$startDate, $endDate] = $this->calculateRecurringDates($validated['recurring_type']);
+                [$startDate, $endDate] = $this->calculateRecurringDates($validated['recurring_type'], $timezone);
                 $validated['start_date'] = $startDate;
                 $validated['end_date'] = $endDate;
             } else {
@@ -111,28 +122,101 @@ class BudgetController extends Controller
     /**
      * Calculate start time -> end time based on recurring type
      */
-    private function calculateRecurringDates(string $recurringType): array
+    private function calculateRecurringDates(string $recurringType, ?string $timezone = null): array
     {
-        $now = Carbon::now();
+        $now = $timezone ? Carbon::now($timezone) : Carbon::now();
 
-        return match ($recurringType) {
-            RecurringTypes::Weekly => [
-                $now->copy()->startOfWeek(),
-                $now->copy()->endOfWeek()
-            ],
-            RecurringTypes::Monthly => [
-                $now->copy()->startOfMonth(),
-                $now->copy()->endOfMonth()
-            ],
-            RecurringTypes::Quarterly => [
-                $now->copy()->startOfQuarter(),
-                $now->copy()->endOfQuarter()
-            ],
-            RecurringTypes::Yearly => [
-                $now->copy()->startOfYear(),
-                $now->copy()->endOfYear()
-            ],
-            default => [null, null],
+        [$start, $end] = match ($recurringType) {
+            RecurringTypes::Weekly    => [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()],
+            RecurringTypes::Monthly   => [$now->copy()->startOfMonth(), $now->copy()->endOfMonth()],
+            RecurringTypes::Quarterly => [$now->copy()->startOfQuarter(), $now->copy()->endOfQuarter()],
+            RecurringTypes::Yearly    => [$now->copy()->startOfYear(), $now->copy()->endOfYear()],
+            default                   => [null, null],
         };
+
+        return [
+            $start?->format('Y-m-d'),
+            $end?->format('Y-m-d'),
+        ];
+    }
+
+    public function getBudgetByUser(Request $request)
+    {
+        try {
+            $user = $request->user();
+
+            $validatedData = $request->only([
+                'wallet_use_scope', 'wallet_id', 'category_id',
+                'is_recurring', 'recurring_type',
+                'start_date', 'end_date',
+                'limit_amount_from', 'limit_amount_to',
+                'spent_amount_from', 'spent_amount_to',
+                'per_page', 'page'
+            ]);
+
+            $diff = array_diff(array_keys($request->all()), array_keys($validatedData));
+
+            if (!empty($diff)) {
+                return ApiResponse::error(__('budget.invalid_query'), [
+                    'invalid_keys' => $diff
+                ], HttpStatusCode::UNPROCESSABLE_ENTITY);
+            }
+
+            $validator = Validator::make($validatedData, [
+                'wallet_use_scope'     => ['nullable', Rule::in(WalletUseScopes::ALL)],
+                'wallet_id'            => 'required_if:wallet_use_scope,wallet|integer|exists:wallets,id',
+                'category_id'          => 'nullable|integer|exists:categories,id',
+                'is_recurring'         => 'nullable|boolean',
+                'recurring_type'       => ['nullable', Rule::in(RecurringTypes::ALL)],
+                'start_date'           => 'nullable|date',
+                'end_date'             => 'nullable|date|after_or_equal:start_date',
+                'limit_amount_from'    => 'nullable|numeric|min:0',
+                'limit_amount_to'      => 'nullable|numeric|gte:limit_amount_from',
+                'spent_amount_from'    => 'nullable|numeric|min:0',
+                'spent_amount_to'      => 'nullable|numeric|gte:spent_amount_from',
+                'per_page'             => 'nullable|integer|min:1|max:100',
+                'page'                 => 'nullable|integer|min:1|max:100',
+            ]);
+
+            if ($validator->fails()) {
+                return ApiResponse::error(
+                    __('budget.invalid_query'),
+                    $validator->errors(),
+                    HttpStatusCode::UNPROCESSABLE_ENTITY
+                );
+            }
+
+            $perPage = $request->query('per_page', $this->perPage);
+
+            $cacheKey = 'budgets:user:' . $user->id . ':filters:' . md5(json_encode($validatedData) . $perPage);
+
+            $budgets = Cache::remember($cacheKey, now()->addMinutes(value: 2), function () use ($user, $request, $perPage) {
+                return Budget::query()
+                    ->where('user_id', $user->id)
+                    ->when($request->wallet_use_scope, fn ($q) => $q->where('wallet_use_scope', $request->wallet_use_scope))
+                    ->when($request->wallet_use_scope === 'wallet' && $request->wallet_id, fn ($q) => $q->where('wallet_id', $request->wallet_id))
+                    ->when($request->category_id, fn ($q) => $q->where('category_id', $request->category_id))
+                    ->when(!is_null($request->is_recurring), fn ($q) => $q->where('is_recurring', $request->is_recurring))
+                    ->when($request->recurring_type, fn ($q) => $q->where('recurring_type', $request->recurring_type))
+                    ->when($request->start_date, fn ($q) => $q->whereDate('start_date', '>=', $request->start_date))
+                    ->when($request->end_date, fn ($q) => $q->whereDate('end_date', '<=', $request->end_date))
+                    ->when($request->limit_amount_from, fn ($q) => $q->where('limit_amount', '>=', $request->limit_amount_from))
+                    ->when($request->limit_amount_to, fn ($q) => $q->where('limit_amount', '<=', $request->limit_amount_to))
+                    ->when($request->spent_amount_from, fn ($q) => $q->where('spent_amount', '>=', $request->spent_amount_from))
+                    ->when($request->spent_amount_to, fn ($q) => $q->where('spent_amount', '<=', $request->spent_amount_to))
+                    ->with(['category'])
+                    ->paginate($perPage);
+            });
+
+            return ApiResponse::success([
+                'budgets' => $budgets
+            ], HttpStatusCode::OK);
+        } catch (\Throwable $e) {
+            return ApiResponse::error(
+                __('budget.fetch_failed') . $e->getMessage(),
+                [],
+                HttpStatusCode::INTERNAL_SERVER_ERROR
+            );
+        }
     }
 }

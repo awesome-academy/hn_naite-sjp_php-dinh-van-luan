@@ -35,5 +35,6 @@ Route::middleware(['auth:sanctum, checkAccessTokenExpiry'])
 
         Route::prefix('budget')->group(function () {
             Route::post('/create', [BudgetController::class, 'create']);
+            Route::get('/get', [BudgetController::class,'getBudgetByUser']);
         });
     });

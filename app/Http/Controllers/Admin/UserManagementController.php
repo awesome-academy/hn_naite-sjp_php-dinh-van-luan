@@ -13,7 +13,7 @@ class UserManagementController extends Controller
 {
     protected array $roleBadges;
     protected array $defaultBadge;
-    private const PER_PAGE = 10;
+    protected int $perPage;
 
     public function __construct()
     {
@@ -21,6 +21,7 @@ class UserManagementController extends Controller
 
         $this->roleBadges = config('roles.badges');
         $this->defaultBadge = config('roles.default');
+        $this->perPage = config("paginate")["per_page"] ?? 10;
     }
 
     public function index(Request $request)
@@ -38,7 +39,7 @@ class UserManagementController extends Controller
             $query->whereHas('roles', fn ($q) => $q->where('name', $role));
         }
 
-        $users = tap($query->paginate(self::PER_PAGE))->withQueryString();
+        $users = tap($query->paginate($this->perPage))->withQueryString();
 
         $roleBadges = $this->roleBadges;
         $defaultBadge = $this->defaultBadge;
