@@ -1,11 +1,10 @@
 <?php
 
-use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\User\WalletController;
 use App\Http\Controllers\User\BudgetController;
-use App\Models\Role;
+use App\Http\Controllers\User\TransactionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -38,5 +37,9 @@ Route::middleware(['auth:sanctum, checkAccessTokenExpiry'])
             Route::get('/get', [BudgetController::class,'getBudgetByUser']);
             Route::get('/get/{id}', [BudgetController::class, 'getDetailById']);
             Route::put('/update/{id}', [BudgetController::class, 'update']);
+        });
+
+        Route::prefix('transaction')->group(function () {
+            Route::post('/create', [TransactionController::class, 'create']);
         });
     });
