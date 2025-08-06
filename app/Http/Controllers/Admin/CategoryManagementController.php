@@ -12,7 +12,7 @@ class CategoryManagementController extends Controller
 {
     protected array $walletTypeConfigs;
     protected array  $typeConfig;
-    private const PER_PAGE = 10;
+    protected int $perPage;
 
     public function __construct()
     {
@@ -20,6 +20,7 @@ class CategoryManagementController extends Controller
 
         $this->walletTypeConfigs = config('wallet_types');
         $this->typeConfig = config('category_types');
+        $this->perPage = config("paginate")["per_page"] ?? 10;
     }
 
     public function index(Request $request)
@@ -45,7 +46,7 @@ class CategoryManagementController extends Controller
             });
         }
 
-        $categories = tap($query->paginate(self::PER_PAGE))->withQueryString();
+        $categories = tap($query->paginate($this->perPage))->withQueryString();
 
         $categories->getCollection()->transform(function ($category) {
             $wallets = $category->walletTypes ?? collect();

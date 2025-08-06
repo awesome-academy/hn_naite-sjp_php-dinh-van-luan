@@ -408,6 +408,332 @@
                 ]
             }
         },
+        "/api/budget/get": {
+            "get": {
+                "tags": [
+                    "Budget"
+                ],
+                "summary": "Lấy danh sách ngân sách theo người dùng",
+                "description": "Truy xuất danh sách budget của người dùng hiện tại. Hỗ trợ lọc theo nhiều điều kiện khác nhau và phân trang. Cần token xác thực.",
+                "operationId": "43370423dad9c05682d467408fc91260",
+                "parameters": [
+                    {
+                        "name": "wallet_use_scope",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "total",
+                                "wallet"
+                            ],
+                            "example": "wallet"
+                        }
+                    },
+                    {
+                        "name": "wallet_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    },
+                    {
+                        "name": "category_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 3
+                        }
+                    },
+                    {
+                        "name": "is_recurring",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    },
+                    {
+                        "name": "recurring_type",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "weekly",
+                                "monthly",
+                                "quarterly"
+                            ],
+                            "example": "monthly"
+                        }
+                    },
+                    {
+                        "name": "start_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-01"
+                        }
+                    },
+                    {
+                        "name": "end_date",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-31"
+                        }
+                    },
+                    {
+                        "name": "limit_amount_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": 100
+                        }
+                    },
+                    {
+                        "name": "limit_amount_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": 1000
+                        }
+                    },
+                    {
+                        "name": "spent_amount_from",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": 50
+                        }
+                    },
+                    {
+                        "name": "spent_amount_to",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "example": 900
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 100,
+                            "minimum": 1,
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lấy danh sách ngân sách thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "OK"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "budgets": {
+                                                    "properties": {
+                                                        "current_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "data": {
+                                                            "type": "array",
+                                                            "items": {
+                                                                "properties": {
+                                                                    "id": {
+                                                                        "type": "integer",
+                                                                        "example": 12
+                                                                    },
+                                                                    "category_id": {
+                                                                        "type": "integer",
+                                                                        "example": 3
+                                                                    },
+                                                                    "wallet_use_scope": {
+                                                                        "type": "string",
+                                                                        "example": "wallet"
+                                                                    },
+                                                                    "wallet_id": {
+                                                                        "type": "integer",
+                                                                        "example": 2,
+                                                                        "nullable": true
+                                                                    },
+                                                                    "limit_amount": {
+                                                                        "type": "number",
+                                                                        "example": 500
+                                                                    },
+                                                                    "spent_amount": {
+                                                                        "type": "number",
+                                                                        "example": 100
+                                                                    },
+                                                                    "is_recurring": {
+                                                                        "type": "boolean",
+                                                                        "example": false
+                                                                    },
+                                                                    "recurring_type": {
+                                                                        "type": "string",
+                                                                        "example": "monthly",
+                                                                        "nullable": true
+                                                                    },
+                                                                    "start_date": {
+                                                                        "type": "string",
+                                                                        "format": "date-time",
+                                                                        "example": "2025-01-01T00:00:00Z"
+                                                                    },
+                                                                    "end_date": {
+                                                                        "type": "string",
+                                                                        "format": "date-time",
+                                                                        "example": "2025-12-31T23:59:59Z"
+                                                                    },
+                                                                    "category": {
+                                                                        "properties": {
+                                                                            "id": {
+                                                                                "type": "integer",
+                                                                                "example": 3
+                                                                            },
+                                                                            "name": {
+                                                                                "type": "string",
+                                                                                "example": "Ăn uống"
+                                                                            },
+                                                                            "type": {
+                                                                                "type": "string",
+                                                                                "example": "expense"
+                                                                            }
+                                                                        },
+                                                                        "type": "object"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            }
+                                                        },
+                                                        "total": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "per_page": {
+                                                            "type": "integer",
+                                                            "example": 10
+                                                        },
+                                                        "last_page": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "from": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "to": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Tham số truy vấn không hợp lệ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tham số truy vấn không hợp lệ"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "wallet_use_scope": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The selected wallet_use_scope is invalid."
+                                                    }
+                                                },
+                                                "invalid_keys": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "unknown_param"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi server khi truy vấn ngân sách",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Không thể lấy danh sách ngân sách"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {}
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/wallet": {
             "post": {
                 "tags": [
