@@ -15,6 +15,7 @@ use App\Constants\WalletUseScopes;
 use App\Services\Budget\BudgetService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class BudgetController extends Controller
 {
@@ -115,6 +116,7 @@ class BudgetController extends Controller
         } catch (ValidationException $e) {
             return ApiResponse::error(__('budget.invalid_data'), $e->errors(), HttpStatusCode::UNPROCESSABLE_ENTITY);
         } catch (\Exception $e) {
+            Log::error('Budget update failed', ['error' => $e->getMessage(), 'stack' => $e->getTraceAsString()]);
             return ApiResponse::error(__('budget.created_failed'), [], HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }
@@ -212,11 +214,132 @@ class BudgetController extends Controller
                 'budgets' => $budgets
             ], HttpStatusCode::OK);
         } catch (\Throwable $e) {
+            Log::error('Budget update failed', ['error' => $e->getMessage(), 'stack' => $e->getTraceAsString()]);
             return ApiResponse::error(
-                __('budget.fetch_failed') . $e->getMessage(),
+                __('budget.fetch_failed'),
                 [],
                 HttpStatusCode::INTERNAL_SERVER_ERROR
             );
+        }
+    }
+
+    public function getDetailById(Request $request, $id)
+    {
+        try {
+            $user = $request->user();
+
+            $budget = Budget::where('id', $id)
+                            ->where('user_id', $user->id)
+                            ->with(['category'])
+                            ->first();
+
+            if (!$budget) {
+                return ApiResponse::success([], __('budget.budget_not_found'), HttpStatusCode::NOT_FOUND);
+            }
+
+            return ApiResponse::success(['budget' => $budget], __('budget.budget_detail_retrieved'), HttpStatusCode::NOT_FOUND);
+        } catch (\Throwable $e) {
+            Log::error('Budget update failed', ['error' => $e->getMessage(), 'stack' => $e->getTraceAsString()]);
+            return ApiResponse::error(__('budget.error_getting_budget_detail'), [], HttpStatusCode::INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function update(Request $request, BudgetService $budgetService, int $id)
+    {
+        try {
+            $user = auth()->user();
+
+            $budget = Budget::find($id);
+
+            if (!$budget) {
+                return ApiResponse::error(__('budget.budget_not_found'), [], HttpStatusCode::NOT_FOUND);
+            }
+
+            if ($budget->user_id !== $user->id) {
+                return ApiResponse::error(__('budget.unauthorized'), [], HttpStatusCode::FORBIDDEN);
+            }
+
+            $validated = $request->validate([
+                'category_id'      => 'sometimes|required|exists:categories,id',
+                'limit_amount'     => 'sometimes|required|numeric|min:0.01',
+                'wallet_use_scope' => ['sometimes', Rule::in(WalletUseScopes::ALL)],
+                'wallet_id'        => 'nullable|exists:wallets,id',
+                'is_recurring'     => 'sometimes|required|boolean',
+                'recurring_type'   => ['sometimes', Rule::in(RecurringTypes::ALL)],
+                'start_date'       => 'nullable|date',
+                'end_date'         => 'nullable|date|after_or_equal:start_date',
+            ]);
+
+            if (
+                ($validated['wallet_use_scope'] ?? $budget->wallet_use_scope) === WalletUseScopes::Wallet &&
+                empty($validated['wallet_id'] ?? $budget->wallet_id)
+            ) {
+                return ApiResponse::error(__('budget.wallet_required'), [], HttpStatusCode::UNPROCESSABLE_ENTITY);
+            }
+
+            if (($validated['wallet_use_scope'] ?? $budget->wallet_use_scope) === WalletUseScopes::Total) {
+                $validated['wallet_id'] = null;
+            }
+
+            if ($validated['is_recurring'] ?? $budget->is_recurring) {
+                $recurringType = $validated['recurring_type'] ?? $budget->recurring_type;
+
+                if (!in_array($recurringType, RecurringTypes::ALL)) {
+                    return ApiResponse::error(__('budget.invalid_recurring_type'), [], HttpStatusCode::UNPROCESSABLE_ENTITY);
+                }
+
+                [$startDate, $endDate] = $this->calculateRecurringDates($recurringType, $user?->timezone);
+                $validated['start_date'] = $startDate;
+                $validated['end_date'] = $endDate;
+            } else {
+                if (empty($validated['start_date']) && empty($budget->start_date)) {
+                    return ApiResponse::error(__('budget.custom_date_required'), [], HttpStatusCode::UNPROCESSABLE_ENTITY);
+                }
+            }
+
+            // check exist budget
+            $categoryId     = $validated['category_id'] ?? $budget->category_id;
+            $walletScope    = $validated['wallet_use_scope'] ?? $budget->wallet_use_scope;
+            $walletId       = $validated['wallet_id'] ?? $budget->wallet_id;
+            $startDate      = $validated['start_date'] ?? $budget->start_date;
+            $endDate        = $validated['end_date'] ?? $budget->end_date;
+
+            $duplicate = Budget::where('user_id', $user->id)
+                        ->where('id', '!=', $budget->id)
+                        ->where('category_id', $categoryId)
+                        ->where('wallet_use_scope', $walletScope)
+                        ->when($walletScope === WalletUseScopes::Wallet, fn ($q) => $q->where('wallet_id', $walletId))
+                        ->when($walletScope === WalletUseScopes::Total, fn ($q) => $q->whereNull('wallet_id'))
+                        ->whereDate('start_date', $startDate)
+                        ->whereDate('end_date', $endDate)
+                        ->exists();
+
+            if ($duplicate) {
+                return ApiResponse::error(__('budget.duplicate_budget'), [], HttpStatusCode::UNPROCESSABLE_ENTITY);
+            }
+
+            $spentAmount = $budgetService->calculateSpentAmount(
+                $user,
+                $categoryId,
+                $walletScope,
+                $walletId,
+                $startDate,
+                $endDate
+            );
+
+            $validated['spent_amount'] = $spentAmount;
+
+            $budget->update($validated);
+
+            return ApiResponse::success([
+                'budget' => $budget
+            ], __('budget.updated_successfully'), HttpStatusCode::OK);
+
+        } catch (ValidationException $e) {
+            return ApiResponse::error(__('budget.invalid_data'), $e->errors(), HttpStatusCode::UNPROCESSABLE_ENTITY);
+        } catch (\Exception $e) {
+            Log::error('Budget update failed', ['error' => $e->getMessage(), 'stack' => $e->getTraceAsString()]);
+            return ApiResponse::error(__('budget.updated_failed'), [], HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }
 }
