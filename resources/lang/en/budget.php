@@ -10,4 +10,11 @@ return [
     'user_setting_currency_missing' => 'Default currency is not defined in user settings.',
     'invalid_query' => 'Invalid query.',
     'fetch_failed' => 'Fetch budget faild.',
+    'updated_successfully' => 'Budget update successful.',
+    'updated_failed' => 'Budget update failed.',
+    'unauthorized' => 'Invalid budget.',
+    'budget_not_found' => 'Budget not found.',
+    'budget_detail_retrieved' => 'Budget detail retrieved successfully.',
+    'error_getting_budget_detail' => 'Error getting budget detail.',
+    'duplicate_budget' => 'A budget with the same category, wallet, and date range already exists.',
 ];
