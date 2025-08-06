@@ -4,6 +4,7 @@ namespace App\Console;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Jobs\AutoCreateRecurringBudgetJob;
 
 class Kernel extends ConsoleKernel
 {
@@ -15,8 +16,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // schedule to auto update exchange rate from third party
         $schedule->command('exchange-rates:update')->dailyAt('01:00'); // Mỗi ngày lúc 1h sáng
+
+        // schedule to auto recurring budget
+        $schedule->job(new AutoCreateRecurringBudgetJob())->dailyAt('00:01');
     }
 
     /**
