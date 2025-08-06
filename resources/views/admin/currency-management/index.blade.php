@@ -93,7 +93,7 @@
                                             <label class="inline-flex items-center cursor-pointer">
                                                 <input type="checkbox" onchange="this.form.submit()"
                                                     class="sr-only peer"
-                                                    {{ $rateForDate->currency_id === $currency->id ? 'checked disabled' : '' }}>
+                                                    {{ $rateForDate?->currency_id === $currency->id ? 'checked disabled' : '' }}>
                                                 <div
                                                     class="w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 
                                                             peer-checked:bg-blue-600 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed 
