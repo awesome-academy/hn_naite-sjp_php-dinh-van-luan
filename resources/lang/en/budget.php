@@ -17,4 +17,5 @@ return [
     'budget_detail_retrieved' => 'Budget detail retrieved successfully.',
     'error_getting_budget_detail' => 'Error getting budget detail.',
     'duplicate_budget' => 'A budget with the same category, wallet, and date range already exists.',
+    'premium_user' => 'You must sign up for a premium account to create a recurring budget.',
 ];

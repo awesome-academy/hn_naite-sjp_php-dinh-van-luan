@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\User\WalletController;
 use App\Http\Controllers\User\BudgetController;
 use App\Http\Controllers\User\TransactionController;
+use App\Http\Controllers\User\PaymentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,4 +45,13 @@ Route::middleware(['auth:sanctum, checkAccessTokenExpiry'])
             Route::get('/get', [TransactionController::class, 'getTransactionsByUser']);
             Route::get('/get/{id}', [TransactionController::class, 'getTransactionById']);
         });
+
+        Route::prefix('payment')->group(function () {
+            Route::post('/momo', [PaymentController::class, 'payWithMomo'])->middleware('throttle:10,1');
+            Route::get('/momo/redirect', [PaymentController::class, 'momoRedirect'])->name('payment.momo.redirect');
+        });
     });
+
+Route::post('/payment/momo/ipn', [PaymentController::class, 'momoIpn'])
+    ->middleware('throttle:10,1')
+    ->name('payment.momo.ipn');

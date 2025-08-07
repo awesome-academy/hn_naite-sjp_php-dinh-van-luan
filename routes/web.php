@@ -6,6 +6,7 @@ use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Admin\CategoryManagementController;
 use App\Http\Controllers\Admin\CurrencyManagementController;
+use App\Http\Controllers\Admin\ServicePackageManagementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,6 +55,12 @@ Route::middleware(['auth', 'check.admin'])
                 ->name('currencies.updateExchangeRates');
             Route::post('/currencies/{currency}/change-currency-default', [CurrencyManagementController::class, 'changeCurrencyDefault'])
                 ->name('currencies.changeCurrencyDefault');
+        });
+
+        Route::prefix('service-packages')->group(function () {
+            Route::get('/', [ServicePackageManagementController::class, 'index'])->name('service-packages.index');
+            Route::get('/service-packages/{id}', [ServicePackageManagementController::class, 'show'])
+                ->name('service-packages.show');
         });
     });
 

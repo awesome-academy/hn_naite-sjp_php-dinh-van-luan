@@ -16,6 +16,7 @@ use App\Services\Budget\BudgetService;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use App\Constants\UserRoles;
 
 class BudgetController extends Controller
 {
@@ -54,6 +55,10 @@ class BudgetController extends Controller
             }
 
             if ($validated['is_recurring']) {
+                if (!$user->hasRole(UserRoles::PREMIUM_USER)) {
+                    return ApiResponse::error(__('budget.premium_user'), [], HttpStatusCode::UNPROCESSABLE_ENTITY);
+                }
+
                 if (!in_array($validated['recurring_type'], [
                     RecurringTypes::Weekly,
                     RecurringTypes::Monthly,

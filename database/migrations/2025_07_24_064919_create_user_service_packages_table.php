@@ -22,6 +22,8 @@ class CreateUserServicePackagesTable extends Migration
             $table->enum('payment_method', ['momo', 'vnpay']);
             $table->decimal('amount', 15, 2);
             $table->enum('status', ['paid', 'unpaid', 'canceled'])->default('unpaid');
+            $table->string('transaction_id');
+            $table->string('order_id');
             $table->timestamps();
         });
     }
