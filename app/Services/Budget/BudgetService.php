@@ -7,6 +7,8 @@ use App\Models\ExchangeRate;
 use App\Models\Transaction;
 use App\Models\Wallet;
 use Carbon\Carbon;
+use App\Models\Budget;
+use App\Models\User;
 
 class BudgetService
 {
@@ -96,5 +98,29 @@ class BudgetService
         return ExchangeRate::where('target_currency_code', $currencyCode)
             ->where('date', $date)
             ->value('rate') ?? 1;
+    }
+
+    public function updateBudgetsAfterTransaction(Transaction $transaction, User $user): void
+    {
+        $budgets = Budget::where('category_id', $transaction->category_id)
+            ->where('user_id', $user->id)
+            ->whereDate('start_date', '<=', $transaction->date)
+            ->whereDate('end_date', '>=', $transaction->date)
+            ->get();
+
+        foreach ($budgets as $budget) {
+            $spentAmount = app(BudgetService::class)->calculateSpentAmount(
+                $user,
+                $budget->category_id,
+                $budget->wallet_use_scope,
+                $budget->wallet_id,
+                $budget->start_date,
+                $budget->end_date
+            );
+
+            $budget->update([
+                'spent_amount' => $spentAmount
+            ]);
+        }
     }
 }

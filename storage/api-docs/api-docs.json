@@ -734,6 +734,227 @@
                 ]
             }
         },
+        "/api/transaction/create": {
+            "post": {
+                "tags": [
+                    "Transaction"
+                ],
+                "summary": "Tạo mới một giao dịch chi tiêu",
+                "operationId": "createTransaction",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "wallet_id",
+                                    "category_id",
+                                    "amount",
+                                    "date"
+                                ],
+                                "properties": {
+                                    "wallet_id": {
+                                        "description": "ID của ví cần dùng",
+                                        "type": "integer",
+                                        "example": 3
+                                    },
+                                    "category_id": {
+                                        "description": "ID danh mục chi tiêu",
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "amount": {
+                                        "description": "Số tiền chi",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 100000
+                                    },
+                                    "note": {
+                                        "description": "Ghi chú (tùy chọn)",
+                                        "type": "string",
+                                        "example": "Đi ăn trưa với bạn"
+                                    },
+                                    "date": {
+                                        "description": "Ngày giao dịch",
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-08-05"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Giao dịch tạo thành công",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Giao dịch tạo thành công"
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "transaction": {
+                                                    "properties": {
+                                                        "id": {
+                                                            "type": "integer",
+                                                            "example": 12
+                                                        },
+                                                        "user_id": {
+                                                            "type": "integer",
+                                                            "example": 1
+                                                        },
+                                                        "wallet_id": {
+                                                            "type": "integer",
+                                                            "example": 3
+                                                        },
+                                                        "category_id": {
+                                                            "type": "integer",
+                                                            "example": 5
+                                                        },
+                                                        "amount": {
+                                                            "type": "number",
+                                                            "format": "float",
+                                                            "example": 100000
+                                                        },
+                                                        "note": {
+                                                            "type": "string",
+                                                            "example": "Đi ăn trưa với bạn"
+                                                        },
+                                                        "date": {
+                                                            "type": "string",
+                                                            "format": "date",
+                                                            "example": "2025-08-05"
+                                                        },
+                                                        "created_at": {
+                                                            "type": "string",
+                                                            "example": "2025-08-05T08:00:00Z"
+                                                        },
+                                                        "updated_at": {
+                                                            "type": "string",
+                                                            "example": "2025-08-05T08:00:00Z"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Số dư không đủ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Số dư ví không đủ"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Không có quyền truy cập ví",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Không được phép thao tác với ví này"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dữ liệu không hợp lệ",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Dữ liệu không hợp lệ"
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "amount": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Số tiền phải lớn hơn 0"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Lỗi hệ thống khi tạo giao dịch",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Tạo giao dịch thất bại"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/wallet": {
             "post": {
                 "tags": [
@@ -1469,6 +1690,10 @@
         {
             "name": "Budget",
             "description": "Budget"
+        },
+        {
+            "name": "Transaction",
+            "description": "Transaction"
         },
         {
             "name": "Wallet",
