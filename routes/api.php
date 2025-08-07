@@ -41,5 +41,7 @@ Route::middleware(['auth:sanctum, checkAccessTokenExpiry'])
 
         Route::prefix('transaction')->group(function () {
             Route::post('/create', [TransactionController::class, 'create']);
+            Route::get('/get', [TransactionController::class, 'getTransactionsByUser']);
+            Route::get('/get/{id}', [TransactionController::class, 'getTransactionById']);
         });
     });
