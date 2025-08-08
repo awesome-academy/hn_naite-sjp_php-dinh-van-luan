@@ -17,4 +17,5 @@ return [
     'budget_detail_retrieved' => 'Lấy thông tin ngân sách thành công.',
     'error_getting_budget_detail' => 'Lỗi khi tải chi tiết ngân sách.',
     'duplicate_budget' => 'Đã tồn tại ngân sách có cùng danh mục, ví tiền và phạm vi ngày.',
+    'premium_user' => 'Bạn phải đăng ký tài khoản premium để tạo ngân sách định kỳ',
 ];

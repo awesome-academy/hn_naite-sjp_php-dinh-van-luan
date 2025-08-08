@@ -16,8 +16,17 @@ class UserServicePackage extends Model
        'expire_date',
        'payment_method',
        'amount',
-       'status'
+       'status',
+       'transaction_id',
+       'order_id',
     ];
+
+    public const STATUS_PAID = 'paid';
+    public const STATUS_UNPAID = 'unpaid';
+    public const STATUS_CANCELED = 'canceled';
+
+    public const METHOD_MOMO = 'momo';
+    public const METHOD_VNPAY = 'vnpay';
 
     protected $casts = [
         'register_date' => 'datetime',

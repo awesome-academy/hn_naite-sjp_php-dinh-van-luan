@@ -59,5 +59,15 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
+
+        // Custom limiter for user call MoMo (payWithMomo)
+        RateLimiter::for('momo-user', function (Request $request) {
+            return Limit::perMinute(3)->by(optional($request->user())->id ?: $request->ip());
+        });
+
+        // Custom limiter for IP call IPN from MoMo
+        RateLimiter::for('momo-ipn', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
     }
 }

@@ -27,6 +27,10 @@
                     <x-nav-link :href="route('currencies.index')" :active="request()->routeIs('currencies.*')">
                         {{ __('currency.currency_management') }}
                     </x-nav-link>
+
+                    <x-nav-link :href="route('service-packages.index')" :active="request()->routeIs('service-packages.*')">
+                        {{ __('service-package.service_package_management') }}
+                    </x-nav-link>
                 </div>
             </div>
 
