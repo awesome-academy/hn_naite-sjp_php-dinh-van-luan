@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use App\Services\Transaction\TransactionService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\RecurringTransaction;
 
 class TransactionController extends Controller
 {
@@ -133,6 +134,35 @@ class TransactionController extends Controller
         } catch (\Throwable $e) {
             Log::error('Fetch transaction detail failed', ['error' => $e->getMessage(), 'stack' => $e->getTraceAsString()]);
             return ApiResponse::error(__('transaction.fetch_failed'), [], HttpStatusCode::INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public function createRecurringTransaction(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'wallet_id' => 'required|exists:wallets,id',
+                'category_id' => 'required|exists:categories,id',
+                'amount' => 'required|numeric|min:0.01',
+                'note' => 'nullable|string|max:255',
+                'recurring_type' => 'required|in:daily,weekly,monthly,yearly',
+                'interval_value' => 'required|integer|min:1',
+                'start_date' => 'required|date',
+                'is_forever' => 'required|boolean',
+                'end_date' => 'nullable|date|after_or_equal:start_date',
+                'max_occurrences' => 'nullable|integer|min:1',
+            ]);
+
+            $recurring = RecurringTransaction::create($validated);
+
+            return ApiResponse::success([
+                'recurring_transaction' => $recurring
+            ], __('transaction.recurring_created_successfully'), HttpStatusCode::CREATED);
+        } catch (ValidationException $e) {
+            return ApiResponse::error(__('transaction.invalid_data'), $e->errors(), HttpStatusCode::UNPROCESSABLE_ENTITY);
+        } catch (\Exception $e) {
+            Log::error('Create recurring failed', ['error' => $e->getMessage()]);
+            return ApiResponse::error(__('transaction.created_failed'), [], HttpStatusCode::INTERNAL_SERVER_ERROR);
         }
     }
 }
