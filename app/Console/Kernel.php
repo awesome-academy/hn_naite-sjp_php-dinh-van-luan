@@ -21,6 +21,9 @@ class Kernel extends ConsoleKernel
 
         // schedule to auto recurring budget
         $schedule->job(new AutoCreateRecurringBudgetJob())->dailyAt('00:01');
+
+        // schedule to auto recurring transaction
+        $schedule->job(new \App\Jobs\CheckRecurringTransactionsJob())->dailyAt('00:01');
     }
 
     /**

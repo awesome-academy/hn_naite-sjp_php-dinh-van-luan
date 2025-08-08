@@ -7,8 +7,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 use App\Constants\UserRoles;
+use App\Helpers\ApiResponse;
+use App\Enums\HttpStatusCode;
 
-class CheckAdmin
+class CheckPremium
 {
     /**
      * Handle an incoming request.
@@ -19,8 +21,8 @@ class CheckAdmin
     {
         $user = Auth::user();
 
-        if (!$user || !$user->hasRole(UserRoles::ADMIN)) {
-            abort(403, message: 'Access denied');
+        if (!$user || !$user->hasRole(UserRoles::PREMIUM_USER)) {
+            return ApiResponse::error(__('auth.access_denied'), [], HttpStatusCode::FORBIDDEN);
         }
 
         return $next($request);

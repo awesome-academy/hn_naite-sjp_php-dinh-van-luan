@@ -10,4 +10,5 @@ return [
     'refresh_token_success'   => 'Làm mới token thành công',
     'refresh_token_invalid'   => 'Refresh token không hợp lệ hoặc đã hết hạn',
     'token_expired' => 'Token đã hết hạn',
+    'access_denied' => 'Bạn không có quyền truy cập.',
 ];

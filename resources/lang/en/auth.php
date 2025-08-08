@@ -10,4 +10,5 @@ return [
     'refresh_token_success'   => 'Token refreshed successfully',
     'refresh_token_invalid'   => 'Refresh token is invalid or has expired',
     'token_expired' => 'Token has expired',
+    'access_denied' => 'Access Deniend.',
 ];
